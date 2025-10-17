@@ -2,10 +2,12 @@
 <html lang="ko">
     {% extends "layout.html" %}
 
-    {% block title %}새 글 작성{% endblock %}
+{% block title %}새 방명록 작성{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">새 방명록 남기기</h1>
     
-    {% block content %}
-        <h1 class="mb-4">새 글 작성</h1>
+    <div class="card p-4 shadow-sm">
         <form method="POST" action="{{ url_for('write') }}">
             <div class="mb-3">
                 <label for="title" class="form-label">제목</label>
@@ -13,11 +15,14 @@
             </div>
             <div class="mb-3">
                 <label for="content" class="form-label">내용</label>
-                <textarea class="form-control" id="content" name="content" rows="10" required></textarea>
+                <textarea class="form-control" id="content" name="content" rows="8" required></textarea>
             </div>
             
-            <button type="submit" class="btn btn-success">저장하기</button>
-            <a href="{{ url_for('index') }}" class="btn btn-secondary">취소</a>
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary me-2">방명록 저장</button>
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">작성 취소</a>
+            </div>
         </form>
-    {% endblock %}
+    </div>
+{% endblock %}
 </html>

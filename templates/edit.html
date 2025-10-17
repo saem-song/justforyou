@@ -2,10 +2,12 @@
 <html lang="ko">
     {% extends "layout.html" %}
 
-    {% block title %}게시글 수정: {{ post.title }}{% endblock %}
+{% block title %}방명록 수정: {{ post.title }}{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">방명록 수정</h1>
     
-    {% block content %}
-        <h1 class="mb-4">게시글 수정</h1>
+    <div class="card p-4 shadow-sm">
         <form method="POST" action="{{ url_for('edit', post_id=post.id) }}">
             <div class="mb-3">
                 <label for="title" class="form-label">제목</label>
@@ -13,11 +15,14 @@
             </div>
             <div class="mb-3">
                 <label for="content" class="form-label">내용</label>
-                <textarea class="form-control" id="content" name="content" rows="10" required>{{ post.content }}</textarea>
+                <textarea class="form-control" id="content" name="content" rows="8" required>{{ post.content }}</textarea>
             </div>
             
-            <button type="submit" class="btn btn-success">수정 완료</button>
-            <a href="{{ url_for('post_detail', post_id=post.id) }}" class="btn btn-secondary">취소</a>
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-success me-2">수정 완료</button>
+                <a href="{{ url_for('post_detail', post_id=post.id) }}" class="btn btn-outline-secondary">취소</a>
+            </div>
         </form>
-    {% endblock %}
+    </div>
+{% endblock %}
 </html>

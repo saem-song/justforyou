@@ -29,10 +29,41 @@ with app.app_context():
 # -------------------- 1. READ (게시글 목록 및 상세 조회) --------------------
 
 @app.route('/')
+# app.py (교체할 부분)
+
+# ... 기존 import와 설정 코드들 (변경 없음) ...
+
+# -------------------- 1. READ (게시글 목록 및 상세 조회) --------------------
+
+# 페이지네이션과 검색을 위해 /?page=1&search_query=검색어 형태로 요청을 받음
+@app.route('/')
 def index():
-    # 모든 게시글을 최신 순으로 조회
-    posts = Post.query.order_by(Post.created_at.desc()).all()
-    return render_template('index.html', posts=posts)
+    # URL 쿼리 파라미터에서 'page'와 'search_query' 값을 가져옴
+    page = request.args.get('page', 1, type=int)
+    search_query = request.args.get('search_query', '')
+    per_page = 10  # 페이지당 게시글 수 (10개로 설정)
+
+    # 1. 기본 쿼리 (최신 순)
+    query = Post.query.order_by(Post.created_at.desc())
+    
+    # 2. 검색어가 있다면 쿼리에 필터 추가
+    if search_query:
+        # 제목 또는 내용에 검색어가 포함된 게시글을 찾음
+        search_filter = Post.title.like(f'%{search_query}%') | Post.content.like(f'%{search_query}%')
+        query = query.filter(search_filter)
+
+    # 3. 페이지네이션 적용
+    posts_pagination = query.paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+    
+    # posts_pagination 변수를 HTML 템플릿으로 전달합니다!
+    return render_template('index.html', 
+                           posts_pagination=posts_pagination, # <-- 이 변수가 이제 전달됩니다!
+                           posts=posts_pagination.items,
+                           search_query=search_query) 
+
+# ... 나머지 함수들 (post_detail, write, edit, delete)은 변경 없음 ...
 
 @app.route('/post/<int:post_id>')
 def post_detail(post_id):
