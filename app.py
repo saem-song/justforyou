@@ -1,11 +1,10 @@
-# app.py
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 # Flask 앱 설정
 app = Flask(__name__)
-# SQLite 데이터베이스 설정 (프로젝트 폴더에 'test.db' 파일로 저장됨)
+# SQLite 데이터베이스 설정
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
@@ -14,113 +13,98 @@ db = SQLAlchemy(app)
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
+    # 작성자 필드 추가 (nullable=False로 필수 입력)
+    author = db.Column(db.String(50), default="익명", nullable=False) 
     content = db.Column(db.Text, nullable=False)
+    # 생성 시간 (최초 저장 시각)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # 최종 수정 시간 (수정될 때마다 자동으로 현재 시각으로 업데이트)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow) 
 
     def __repr__(self):
         return f'<Post {self.id}>'
 
 # -------------------- DB 초기화 (테이블 생성) --------------------
-# 앱 컨텍스트 내에서 DB 테이블 생성 실행
 with app.app_context():
     db.create_all()
 
 
-# -------------------- 1. READ (게시글 목록 및 상세 조회) --------------------
-
-@app.route('/')
-# app.py (교체할 부분)
-
-# ... 기존 import와 설정 코드들 (변경 없음) ...
-
-# -------------------- 1. READ (게시글 목록 및 상세 조회) --------------------
-
-# 페이지네이션과 검색을 위해 /?page=1&search_query=검색어 형태로 요청을 받음
+# -------------------- 1. READ (목록 및 검색) --------------------
 @app.route('/')
 def index():
-    # URL 쿼리 파라미터에서 'page'와 'search_query' 값을 가져옴
     page = request.args.get('page', 1, type=int)
     search_query = request.args.get('search_query', '')
-    per_page = 10  # 페이지당 게시글 수 (10개로 설정)
+    per_page = 10 
 
-    # 1. 기본 쿼리 (최신 순)
     query = Post.query.order_by(Post.created_at.desc())
     
-    # 2. 검색어가 있다면 쿼리에 필터 추가
     if search_query:
         # 제목 또는 내용에 검색어가 포함된 게시글을 찾음
         search_filter = Post.title.like(f'%{search_query}%') | Post.content.like(f'%{search_query}%')
         query = query.filter(search_filter)
 
-    # 3. 페이지네이션 적용
     posts_pagination = query.paginate(
         page=page, per_page=per_page, error_out=False
     )
     
-    # posts_pagination 변수를 HTML 템플릿으로 전달합니다!
     return render_template('index.html', 
-                           posts_pagination=posts_pagination, # <-- 이 변수가 이제 전달됩니다!
+                           posts_pagination=posts_pagination, 
                            posts=posts_pagination.items,
                            search_query=search_query) 
 
-# ... 나머지 함수들 (post_detail, write, edit, delete)은 변경 없음 ...
-
 @app.route('/post/<int:post_id>')
 def post_detail(post_id):
-    # 특정 ID의 게시글을 조회하거나 없으면 404 에러 반환
     post = db.get_or_404(Post, post_id)
     return render_template('detail.html', post=post)
 
 # -------------------- 2. CREATE (게시글 작성) --------------------
-
 @app.route('/write', methods=['GET', 'POST'])
 def write():
     if request.method == 'POST':
-        # 폼에서 데이터 받아오기
         title = request.form['title']
         content = request.form['content']
+        # 작성자 필드가 비어있으면 "익명" 처리
+        author = request.form['author'] or "익명" 
 
-        # 새 게시글 객체 생성 및 DB 저장
-        new_post = Post(title=title, content=content)
+        new_post = Post(title=title, content=content, author=author) 
         try:
             db.session.add(new_post)
             db.session.commit()
-            return redirect(url_for('index')) # 저장 후 목록 페이지로 이동
+            return redirect(url_for('index'))
         except:
             return "게시글 작성 중 에러가 발생했습니다."
 
-    return render_template('write.html') # GET 요청 시 글쓰기 폼 표시
+    return render_template('write.html')
 
 # -------------------- 3. UPDATE (게시글 수정) --------------------
-
 @app.route('/edit/<int:post_id>', methods=['GET', 'POST'])
 def edit(post_id):
-    # 수정할 게시글 조회
     post = db.get_or_404(Post, post_id)
-
+    
     if request.method == 'POST':
-        # 폼 데이터로 내용 업데이트
         post.title = request.form['title']
+        post.author = request.form['author']
         post.content = request.form['content']
+        # updated_at 필드는 모델에서 onupdate=datetime.utcnow로 자동 처리됨
+
         try:
             db.session.commit()
-            return redirect(url_for('post_detail', post_id=post.id)) # 상세 페이지로 이동
+            return redirect(url_for('post_detail', post_id=post.id)) 
         except:
             return "게시글 수정 중 에러가 발생했습니다."
-
-    return render_template('edit.html', post=post) # GET 요청 시 수정 폼 표시
+    
+    # GET 요청 시 수정 폼 보여주기
+    return render_template('edit.html', post=post) 
 
 # -------------------- 4. DELETE (게시글 삭제) --------------------
-
 @app.route('/delete/<int:post_id>', methods=['POST'])
 def delete(post_id):
-    # 삭제할 게시글 조회
     post = db.get_or_404(Post, post_id)
     
     try:
         db.session.delete(post)
         db.session.commit()
-        return redirect(url_for('index')) # 삭제 후 목록 페이지로 이동
+        return redirect(url_for('index'))
     except:
         return "게시글 삭제 중 에러가 발생했습니다."
 
