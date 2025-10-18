@@ -5,7 +5,7 @@
     {% block title %}Guestbook Entries{% endblock %}
     
     {% block content %}
-        <img src="./logo.png">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" ... >
         <h1 class="mb-5 text-center fw-light">Guestbook Entries</h1>
         
         <!-- 검색 폼 -->
