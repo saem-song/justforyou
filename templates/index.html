@@ -11,7 +11,7 @@
         <!-- 검색 폼 -->
         
         <form class="d-flex mb-5" method="GET" action="{{ url_for('index') }}">
-            <input class="form-control me-2" type="search" placeholder= "🔎 Search by Title or Content" aria-label="Search" name="search_query" value="{{ search_query }}">
+            <input class="form-control me-2" type="search" placeholder= " " aria-label="Search" name="search_query" value="{{ search_query }}">
             <button class="btn btn-dark" type="submit">search</button>
             {% if search_query %}
                 <a href="{{ url_for('index') }}" class="btn btn-outline-secondary ms-2">초기화</a>
