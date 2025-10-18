@@ -6,7 +6,6 @@
     
     {% block content %}
         <img src="{{ url_for('static', filename='images/logo.png') }}" ... >
-        <h1 class="mb-5 text-center fw-light">Guestbook Entries</h1>
         
         <!-- 검색 폼 -->
         <form class="d-flex mb-5" method="GET" action="{{ url_for('index') }}">
@@ -71,7 +70,7 @@
     
         <!-- 📌 오른쪽 하단 고정 버튼 (bottom-0 -> bottom-4로 수정하여 위로 올림) -->
         <div class="position-fixed bottom-30 end-5 p-0">
-            <a href="{{ url_for('write') }}" class="btn btn-primary btn-lg shadow-lg">📝 Leave Your Mark RN!</a>
+            <a href="{{ url_for('write') }}" class="btn btn-primary btn-lg shadow-lg">Leave Your Mark!</a>
         </div>
     
     {% endblock %}
