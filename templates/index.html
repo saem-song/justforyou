@@ -5,7 +5,9 @@
     {% block title %}Guestbook Entries{% endblock %}
     
     {% block content %}
-        <img src="{{ url_for('static', filename='images/logo.png') }}" ... >
+        <div class="flex justify-center mb-12">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" ... >
+        </div>
         
         <!-- 검색 폼 -->
         <form class="d-flex mb-5" method="GET" action="{{ url_for('index') }}">
