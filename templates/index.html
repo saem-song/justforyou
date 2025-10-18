@@ -6,7 +6,7 @@
     
     {% block content %}
         <img src="{{ url_for('static', filename='images/logo.png') }}" ... >
-        <h1 class="mb-5 text-primary fw-light">Guestbook Entries</h1>
+        <h1 class="mb-5 text-primary fw-bold">Guestbook Entries</h1>
         
         <!-- 검색 폼 -->
         <form class="d-flex mb-5" method="GET" action="{{ url_for('index') }}">
